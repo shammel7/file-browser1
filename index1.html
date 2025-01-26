@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Browser</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .sidebar button:hover {
+            background-color: #0056b3;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background-color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar input {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .file-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileListElement = document.querySelector('#file-list');
+            const searchInput = document.querySelector('#search');
+
+            let files = [
+                { name: "users", size: "-", modified: "4 minutes ago", type: "folder" },
+                { name: "storage", size: "-", modified: "4 minutes ago", type: "folder" },
+                { name: "http", size: "-", modified: "4 minutes ago", type: "folder" },
+                { name: "cmd", size: "-", modified: "4 minutes ago", type: "folder" },
+                { name: "wizard.sh", size: "6.23 KB", modified: "an hour ago", type: "file" },
+                { name: "main.go", size: "149 B", modified: "3 days ago", type: "file" },
+                { name: "go.sum", size: "8.93 KB", modified: "a day ago", type: "file" }
+            ];
+
+            function renderFiles(filter = "") {
+                fileListElement.innerHTML = files
+                    .filter(file => file.name.toLowerCase().includes(filter.toLowerCase()))
+                    .map((file, index) => `
+                        <tr data-index="${index}" class="file-row" style="cursor: pointer;">
+                            <td>${file.name}</td>
+                            <td>${file.size}</td>
+                            <td>${file.modified}</td>
+                        </tr>
+                    `).join('');
+
+                document.querySelectorAll('.file-row').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        const index = e.currentTarget.getAttribute('data-index');
+                        openFileOrFolder(index);
+                    });
+                });
+            }
+
+            function openFileOrFolder(index) {
+                const file = files[index];
+                if (file.type === "folder") {
+                    alert(`Opening folder: ${file.name}\n(Here you can show folder contents)`);
+                } else {
+                    alert(`Opening file: ${file.name}\n(Here you can display file contents)`);
+                }
+            }
+
+            document.querySelector('#new-folder').addEventListener('click', () => {
+                const folderName = prompt('Enter the name of the new folder:');
+                if (folderName) {
+                    files.push({ name: folderName, size: "-", modified: "just now", type: "folder" });
+                    renderFiles(searchInput.value);
+                }
+            });
+
+            document.querySelector('#new-file').addEventListener('click', () => {
+                const fileName = prompt('Enter the name of the new file:');
+                if (fileName) {
+                    files.push({ name: fileName, size: "1 KB", modified: "just now", type: "file" });
+                    renderFiles(searchInput.value);
+                }
+            });
+
+            searchInput.addEventListener('input', () => {
+                renderFiles(searchInput.value);
+            });
+
+            renderFiles();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>File Browser</h1>
+            <button id="new-folder">New Folder</button>
+            <button id="new-file">New File</button>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <input type="text" id="search" placeholder="Search...">
+            </div>
+
+            <div class="file-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Last Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-list">
+                        <!-- Files will be rendered here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
